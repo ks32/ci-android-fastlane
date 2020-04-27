@@ -11,7 +11,7 @@ MAINTAINER Asif Hisam <asif@noemail.com>
 ENV VERSION_TOOLS "6200805"
 
 ENV ANDROID_HOME "/sdk"
-ENV PATH "$PATH:${ANDROID_HOME}/tools"
+ENV PATH "$PATH:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools"
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get -qq update \
  && apt-get install -qqy software-properties-common \
