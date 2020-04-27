@@ -59,7 +59,7 @@ RUN while read -r package; do PACKAGES="${PACKAGES}${package} "; done < /sdk/pac
 
 RUN gem install -n ${ANDROID_HOME}/tools/bin fastlane
 
-ADD id_rsa $HOME/.ssh/id_rsa
-ADD id_rsa.pub $HOME/.ssh/id_rsa.pub
+#ADD id_rsa $HOME/.ssh/id_rsa
+#ADD id_rsa.pub $HOME/.ssh/id_rsa.pub
 ADD adbkey $HOME/.android/adbkey
 ADD adbkey.pub $HOME/.android/adbkey.pub
