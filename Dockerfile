@@ -28,8 +28,7 @@ RUN apt-get -qq update \
       lib32ncurses5 \
       lib32z1 \
       unzip \
-      ruby2.4 \
-      ruby2.4-dev \
+      ruby-full \
       build-essential \
       locales \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
