@@ -61,8 +61,7 @@ RUN while read -r package; do PACKAGES="${PACKAGES}${package} "; done < /sdk/pac
 #RUN gem install -n ${ANDROID_HOME}/tools/bin fastlane-plugin-increment_version_code
 
 RUN gem install fastlane -NV \
-  && gem install fastlane-plugin-increment_version_code \
-  && gem update --system "$RUBYGEMS_VERSION"
+  && gem install fastlane-plugin-increment_version_code
 
 #ADD id_rsa $HOME/.ssh/id_rsa
 #ADD id_rsa.pub $HOME/.ssh/id_rsa.pub
