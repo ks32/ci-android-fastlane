@@ -57,9 +57,13 @@ RUN mkdir -p /root/.android \
 RUN while read -r package; do PACKAGES="${PACKAGES}${package} "; done < /sdk/packages.txt \
  && ${ANDROID_HOME}/tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} ${PACKAGES}
 
-RUN gem install -n ${ANDROID_HOME}/tools/bin fastlane
+#RUN gem install -n ${ANDROID_HOME}/tools/bin fastlane
 
-RUN gem install -n ${ANDROID_HOME}/tools/bin fastlane-plugin-increment_version_code
+#RUN gem install -n ${ANDROID_HOME}/tools/bin fastlane-plugin-increment_version_code
+
+RUN gem install fastlane -NV \
+  && gem install fastlane-plugin-increment_version_code \
+  && gem update --system "$RUBYGEMS_VERSION"
 
 #ADD id_rsa $HOME/.ssh/id_rsa
 #ADD id_rsa.pub $HOME/.ssh/id_rsa.pub
