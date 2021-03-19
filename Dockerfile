@@ -1,69 +1,50 @@
-#
-# GitLab CI: Android v0.1
-#
-# https://hub.docker.com/r/ks32/ci-android-fastlane
-# https://github.com/ks32/ci-android-fastlane
-# //update
-
-FROM ubuntu:18.04
+FROM phusion/baseimage:0.10.0
 MAINTAINER Asif Hisam <asif@noemail.com>
-
-ENV VERSION_TOOLS "6200805"
+CMD ["/sbin/my_init"]
+ENV LC_ALL "en_US.UTF-8"
+ENV LANGUAGE "en_US.UTF-8"
+ENV LANG "en_US.UTF-8"
+ENV VERSION_SDK_TOOLS "6514223"
+ENV VERSION_BUILD_TOOLS "29.0.2"
+ENV VERSION_TARGET_SDK "29"
 
 ENV ANDROID_HOME "/sdk"
+
 ENV PATH "$PATH:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools"
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get -qq update \
- && apt-get install -qqy software-properties-common \
- && apt-add-repository ppa:brightbox/ruby-ng \
- && apt-get install -qqy --no-install-recommends \
-      bzip2 \
-      curl \
-      git-core \
-      html2text \
-      openjdk-8-jdk \
-      libc6-i386 \
-      lib32stdc++6 \
-      lib32gcc1 \
-      lib32ncurses5 \
-      lib32z1 \
-      unzip \
-      ruby-full \
-      build-essential \
-      locales \
- && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-RUN locale-gen en_US.UTF-8
-ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
-RUN rm -f /etc/ssl/certs/java/cacerts; \
-    /var/lib/dpkg/info/ca-certificates-java.postinst configure
+ENV HOME "/root"
 
-RUN curl -s https://dl.google.com/android/repository/commandlinetools-linux-${VERSION_TOOLS}_latest.zip > /tools.zip \
- && mkdir -p ${ANDROID_HOME} \
- && unzip /tools.zip -d ${ANDROID_HOME} \
- && rm -v /tools.zip
+RUN apt-add-repository ppa:brightbox/ruby-ng
+RUN apt-get update
+RUN apt-get -y install --no-install-recommends \
+    curl \
+    openjdk-8-jdk \
+    unzip \
+    zip \
+    git \
+    ruby-full \
+    build-essential \
+    file \
+    ssh
 
-RUN mkdir -p $ANDROID_HOME/licenses/ \
- && echo "8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb78af6dfcb131a6481e\n24333f8a63b6825ea9c5514f83c2829b004d1fee" > $ANDROID_HOME/licenses/android-sdk-license \
- && echo "84831b9409646a918e30573bab4c9c91346d8abd\n504667f4c0de7af1a06de9f4b1727b84351f2910" > $ANDROID_HOME/licenses/android-sdk-preview-license \
- && yes | ${ANDROID_HOME}/tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} --licenses >/dev/null
+ADD https://dl.google.com/android/repository/sdk-tools-linux-${VERSION_SDK_TOOLS}.zip /tools.zip
+RUN unzip /tools.zip -d /sdk && rm -rf /tools.zip
 
-ADD packages.txt /sdk
-RUN mkdir -p /root/.android \
- && touch /root/.android/repositories.cfg \
- && ${ANDROID_HOME}/tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} --update
+RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager --licenses
 
-RUN while read -r package; do PACKAGES="${PACKAGES}${package} "; done < /sdk/packages.txt \
- && ${ANDROID_HOME}/tools/bin/sdkmanager --sdk_root=${ANDROID_HOME} ${PACKAGES}
+RUN mkdir -p $HOME/.android && touch $HOME/.android/repositories.cfg
+RUN ${ANDROID_HOME}/tools/bin/sdkmanager "tools" "platforms;android-${VERSION_TARGET_SDK}" "build-tools;${VERSION_BUILD_TOOLS}"
+RUN ${ANDROID_HOME}/tools/bin/sdkmanager "extras;android;m2repository" "extras;google;google_play_services" "extras;google;m2repository"
 
 #RUN gem install -n ${ANDROID_HOME}/tools/bin fastlane
-
-#RUN gem install -n ${ANDROID_HOME}/tools/bin fastlane-plugin-increment_version_code
-
 RUN gem install fastlane -NV \
   && gem install fastlane-plugin-increment_version_code
 
-#ADD id_rsa $HOME/.ssh/id_rsa
-#ADD id_rsa.pub $HOME/.ssh/id_rsa.pub
+ADD id_rsa $HOME/.ssh/id_rsa
+ADD id_rsa.pub $HOME/.ssh/id_rsa.pub
 ADD adbkey $HOME/.android/adbkey
 ADD adbkey.pub $HOME/.android/adbkey.pub
+ADD android-sdk-license.sh $HOME/android-sdk-license.sh
+
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
