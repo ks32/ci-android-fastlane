@@ -1,4 +1,4 @@
-FROM phusion/baseimage:0.10.0
+FROM ubuntu:18.04
 MAINTAINER Asif Hisam <asif@noemail.com>
 CMD ["/sbin/my_init"]
 ENV LC_ALL "en_US.UTF-8"
